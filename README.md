@@ -1,0 +1,2 @@
+# part_authentication_service
+Часть сервиса аутентификации
