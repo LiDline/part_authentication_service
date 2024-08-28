@@ -2,7 +2,11 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"test/config"
+	router "test/internal/server"
+
+	"net/http"
 
 	"github.com/joho/godotenv"
 )
@@ -10,8 +14,11 @@ import (
 func main() {
 	godotenv.Load()
 
-	сfg := config.MustLoadEnv()
+	port := config.MustLoadEnv().Port
+	r := router.MainRouter()
 
-	fmt.Println(сfg)
+	log.Printf("Server is running on http://localhost:%s", port)
+
+	http.ListenAndServe(fmt.Sprintf(":%s", port), r)
 
 }
