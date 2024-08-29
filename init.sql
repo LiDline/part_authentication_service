@@ -2,7 +2,7 @@
 DROP TABLE IF EXISTS users;
 
 CREATE TABLE users (
-  id TEXT PRIMARY KEY,
+  id GUID PRIMARY KEY,
   password TEXT NOT NULL,
   email: TEXT NOT NULL
 );
@@ -10,7 +10,7 @@ CREATE TABLE users (
 CREATE TABLE refresh_tokens (
   refresh_token TEXT PRIMARY KEY,
   created_at TIMESTAMP,
-  id TEXT NOT NULL,
+  id GUID NOT NULL,
   FOREIGN KEY (id)  REFERENCES users (id) ON DELETE CASCADE
 );
 

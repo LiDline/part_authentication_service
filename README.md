@@ -47,6 +47,9 @@ docker compose up --build # python3.10 и выше
 
 ```text
 ├─ config
+|   └─ Проверка наличия env
+|
+├─ internal
 |   ├─ constants
 |   |   └─ Общие константы
 |   ├─ db
@@ -59,9 +62,6 @@ docker compose up --build # python3.10 и выше
 |   |           └─ Главный роутер
 |   └─ types
 |       └─ Типы
-|
-├─ internal
-|   └─ constants
 |
 └─ init.sql
     └─ Скрипт для БД
