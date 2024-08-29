@@ -19,7 +19,6 @@ func AuthRouter() *chi.Mux {
 
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			http.Error(w, "Bad request", http.StatusBadRequest)
-
 			return
 		}
 
@@ -27,7 +26,6 @@ func AuthRouter() *chi.Mux {
 
 		if err != nil {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-
 			return
 		}
 

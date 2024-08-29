@@ -26,7 +26,7 @@ func GetUserByGUID(req models.LoginRequest) (string, error) {
 	errPassword := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(req.Password))
 
 	if errPassword != nil {
-		return "", err
+		return "", errPassword
 	}
 
 	return id, nil
