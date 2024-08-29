@@ -10,19 +10,19 @@ import (
 )
 
 func CreateTokens(req models.LoginRequest) (string, error) {
-	errBd := getUserByGUID(req)
+	errAuth := checkPassword(req)
 
-	if errBd != nil {
-		return "", errBd
+	if errAuth != nil {
+		return "", errAuth
 	}
 
 	return req.GUID, nil
 }
 
-func getUserByGUID(req models.LoginRequest) error {
+func getUserByGUID(guid string) (string, error) {
 	query := "SELECT id, password FROM users WHERE id = $1"
 
-	row := db.Conn.QueryRow(context.Background(), query, req.GUID)
+	row := db.Conn.QueryRow(context.Background(), query, guid)
 
 	var id string
 	var hashedPassword string
@@ -30,7 +30,17 @@ func getUserByGUID(req models.LoginRequest) error {
 	err := row.Scan(&id, &hashedPassword)
 
 	if err == pgx.ErrNoRows {
-		return err
+		return "", err
+	}
+
+	return hashedPassword, nil
+}
+
+func checkPassword(req models.LoginRequest) error {
+	hashedPassword, errBd := getUserByGUID(req.GUID)
+
+	if errBd != nil {
+		return errBd
 	}
 
 	errPassword := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(req.Password))
