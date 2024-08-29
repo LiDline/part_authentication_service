@@ -3,7 +3,6 @@ DROP TABLE IF EXISTS users;
 
 CREATE TABLE users (
   id GUID PRIMARY KEY,
-  password TEXT NOT NULL,
   email: TEXT NOT NULL
 );
 
@@ -14,9 +13,8 @@ CREATE TABLE refresh_tokens (
   FOREIGN KEY (id)  REFERENCES users (id) ON DELETE CASCADE
 );
 
-INSERT INTO users (id, password)
+INSERT INTO users (id, email)
 VALUES ('57979158-bc47-490c-87fb-183d9b7a99d4', 
-        '$2a$10$0MMD66Q0EPVJLzJ8G04apuKYa/aATC/73t4K5G1wjkdNzrYPnvrKa', 
         'test.email@mail.com');
 
 

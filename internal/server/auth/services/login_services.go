@@ -6,11 +6,10 @@ import (
 	models "test/internal/types"
 
 	"github.com/jackc/pgx/v4"
-	"golang.org/x/crypto/bcrypt"
 )
 
 func CreateTokens(req models.LoginRequest) (string, error) {
-	errAuth := checkPassword(req)
+	errAuth := getUserByGUID(req.Guid)
 
 	if errAuth != nil {
 		return "", errAuth
@@ -21,37 +20,20 @@ func CreateTokens(req models.LoginRequest) (string, error) {
 
 // ----------------------------Check BD----------------------------
 
-func checkPassword(req models.LoginRequest) error {
-	hashedPassword, errBd := getUserByGUID(req.Guid)
-
-	if errBd != nil {
-		return errBd
-	}
-
-	errPassword := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(req.Password))
-
-	if errPassword != nil {
-		return errPassword
-	}
-
-	return nil
-}
-
-func getUserByGUID(guid string) (string, error) {
+func getUserByGUID(guid string) error {
 	query := "SELECT id, password FROM users WHERE id = $1"
 
 	row := db.Conn.QueryRow(context.Background(), query, guid)
 
 	var id string
-	var hashedPassword string
 
-	err := row.Scan(&id, &hashedPassword)
+	err := row.Scan(&id)
 
 	if err == pgx.ErrNoRows {
-		return "", err
+		return err
 	}
 
-	return hashedPassword, nil
+	return nil
 }
 
 // ----------------------------Generate tokens----------------------------
