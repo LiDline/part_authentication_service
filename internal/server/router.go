@@ -2,7 +2,7 @@ package router
 
 import (
 	"test/internal/constants"
-	"test/internal/server/auth"
+	authrouter "test/internal/server/auth"
 	"test/internal/server/healthcheck"
 
 	"github.com/go-chi/chi/v5"
@@ -14,9 +14,9 @@ func MainRouter() *chi.Mux {
 
 	r.Use(middleware.Logger)
 
-	r.Mount(constants.Healthcheck, healthcheck.HealthCheckRouter())
+	r.Mount(constants.HEALTHCHECK, healthcheck.HealthCheckRouter())
 
-	r.Mount(constants.Auth, auth.AuthRouter())
+	r.Mount(constants.AUTH, authrouter.AuthRouter())
 
 	return r
 }

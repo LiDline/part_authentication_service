@@ -1,8 +1,8 @@
 package constants
 
 const (
-	Healthcheck = "/healthcheck"
+	HEALTHCHECK = "/healthcheck"
 
-	Auth      = "/auth"
-	AuthLogin = "/login"
+	AUTH       = "/auth"
+	AUTH_LOGIN = "/login"
 )

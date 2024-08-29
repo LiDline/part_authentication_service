@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  app:
+    container_name: api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    networks:
+      - document_platform
+    environment:
+      PORT: ${PORT}
+      DATABASE_URL: ${DATABASE_URL}
+      SECRET_KEY: ${SECRET_KEY}
+
+  db:
+    container_name: db
+    networks:
+      - document_platform
+    build:
+      context: .
+      dockerfile: Dockerfile.db
+    environment:
+      POSTGRES_DB: test
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_ROOT_PASSWORD: root_password
+    ports:
+      - "5432:5432"
+
+networks:
+  document_platform:
