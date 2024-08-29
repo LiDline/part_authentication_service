@@ -34,11 +34,4 @@ func Init(connStr string) {
 
 	log.Printf("Successful connect to database")
 
-	// defer Conn.Close(context.Background())
-}
-
-func Close() {
-	if Conn != nil {
-		Conn.Close(context.Background())
-	}
 }

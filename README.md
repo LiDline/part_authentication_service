@@ -31,8 +31,38 @@ cp env.example .env
 
 ### Второй шаг
 
+#### dev
+
+```bash
+go run . # В .env вставьте свой DATABASE_URL
+```
+
 #### prod
 
 ```bash
 docker compose up --build # python3.10 и выше
+```
+
+## Дерево проекта
+
+```text
+├─ config
+|   ├─ constants
+|   |   └─ Общие константы
+|   ├─ db
+|   |   └─ Подключение к БД
+|   ├─ server
+|   |   └─ Подключение к БД
+|   |       ├─ [endpoint]
+|   |       |   └─ Роутеры и методы конечных точек
+|   |       └─ router.go
+|   |           └─ Главный роутер
+|   └─ types
+|       └─ Типы
+|
+├─ internal
+|   └─ constants
+|
+└─ init.sql
+    └─ Скрипт для БД
 ```
