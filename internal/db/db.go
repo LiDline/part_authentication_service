@@ -29,8 +29,11 @@ func Init(connStr string) {
 	}
 
 	if err != nil {
-		log.Fatalf("Connect to database")
+		log.Fatalf("Failed to connect to database")
 	}
+
+	log.Printf("Successful connect to database")
+
 	// defer Conn.Close(context.Background())
 }
 

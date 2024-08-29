@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"test/internal/constants"
+	authservices "test/internal/server/auth/services"
 	customTypes "test/internal/types"
 
 	"github.com/go-chi/chi/v5"
@@ -22,15 +23,15 @@ func AuthRouter() *chi.Mux {
 			return
 		}
 
-		// user := authRouterServices.GetUserByGUID(req)
+		user, err := authservices.GetUserByGUID(req)
 
-		// if !user {
-		// 	http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		if err != nil {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 
-		// 	return
-		// }
+			return
+		}
 
-		w.Write([]byte("Auth Login OK"))
+		w.Write([]byte(user))
 	})
 
 	return r

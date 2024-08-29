@@ -18,7 +18,6 @@ func main() {
 	cfg := config.MustLoadEnv()
 
 	db.Init(cfg.DbUrl)
-	defer db.Close()
 
 	r := router.MainRouter()
 
