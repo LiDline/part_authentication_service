@@ -9,7 +9,17 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func GetUserByGUID(req models.LoginRequest) (string, error) {
+func CreateTokens(req models.LoginRequest) (string, error) {
+	errBd := getUserByGUID(req)
+
+	if errBd != nil {
+		return "", errBd
+	}
+
+	return req.GUID, nil
+}
+
+func getUserByGUID(req models.LoginRequest) error {
 	query := "SELECT id, password FROM users WHERE id = $1"
 
 	row := db.Conn.QueryRow(context.Background(), query, req.GUID)
@@ -20,15 +30,14 @@ func GetUserByGUID(req models.LoginRequest) (string, error) {
 	err := row.Scan(&id, &hashedPassword)
 
 	if err == pgx.ErrNoRows {
-		return "", err
+		return err
 	}
 
 	errPassword := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(req.Password))
 
 	if errPassword != nil {
-		return "", errPassword
+		return errPassword
 	}
 
-	return id, nil
-
+	return nil
 }
