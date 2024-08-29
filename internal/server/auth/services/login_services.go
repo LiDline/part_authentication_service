@@ -16,7 +16,25 @@ func CreateTokens(req models.LoginRequest) (string, error) {
 		return "", errAuth
 	}
 
-	return req.GUID, nil
+	return req.Guid, nil
+}
+
+// ----------------------------Check BD----------------------------
+
+func checkPassword(req models.LoginRequest) error {
+	hashedPassword, errBd := getUserByGUID(req.Guid)
+
+	if errBd != nil {
+		return errBd
+	}
+
+	errPassword := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(req.Password))
+
+	if errPassword != nil {
+		return errPassword
+	}
+
+	return nil
 }
 
 func getUserByGUID(guid string) (string, error) {
@@ -36,18 +54,4 @@ func getUserByGUID(guid string) (string, error) {
 	return hashedPassword, nil
 }
 
-func checkPassword(req models.LoginRequest) error {
-	hashedPassword, errBd := getUserByGUID(req.GUID)
-
-	if errBd != nil {
-		return errBd
-	}
-
-	errPassword := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(req.Password))
-
-	if errPassword != nil {
-		return errPassword
-	}
-
-	return nil
-}
+// ----------------------------Generate tokens----------------------------

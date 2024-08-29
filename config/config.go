@@ -7,8 +7,9 @@ import (
 )
 
 type Config struct {
-	Port  string `env:"PORT" env-default:"5000"`
-	DbUrl string `env:"DATABASE_URL" env-required:"true"`
+	Port   string `env:"PORT" env-default:"5000"`
+	DbUrl  string `env:"DATABASE_URL" env-required:"true"`
+	Secret string `env:"SECRET_KEY" env-required:"true"`
 }
 
 func MustLoadEnv() Config {
