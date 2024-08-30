@@ -30,14 +30,21 @@ func AuthRouter() *chi.Mux {
 			return
 		}
 
-		user, err := authservices.CreateTokens(req)
+		tokens, err := authservices.CreateTokens(req)
 
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
 
-		w.Write([]byte(user))
+		response, errJson := json.Marshal(tokens)
+
+		if errJson != nil {
+			http.Error(w, "Error marshalling JSON", http.StatusInternalServerError)
+			return
+		}
+
+		w.Write(response)
 	})
 
 	return r

@@ -2,15 +2,15 @@
 DROP TABLE IF EXISTS users;
 
 CREATE TABLE users (
-  id GUID PRIMARY KEY,
-  email: TEXT NOT NULL
+  id TEXT PRIMARY KEY,
+  email TEXT NOT NULL
 );
 
 CREATE TABLE refresh_tokens (
   refresh_token TEXT PRIMARY KEY,
   created_at TIMESTAMP,
-  ip TEXT,
-  id GUID NOT NULL,
+  ip TEXT NOT NULL,
+  id TEXT NOT NULL,
   FOREIGN KEY (id)  REFERENCES users (id) ON DELETE CASCADE
 );
 

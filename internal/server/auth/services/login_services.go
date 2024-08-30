@@ -14,32 +14,32 @@ import (
 	"github.com/jackc/pgx/v4"
 )
 
-func CreateTokens(req models.LoginRequest) (string, error) {
+func CreateTokens(req models.LoginRequest) (models.LoginResponse, error) {
 	errAuth := getUserByGUID(req.Guid)
 
 	if errAuth != nil {
-		return "", errAuth
+		return models.LoginResponse{}, errAuth
 	}
 
 	accessToken, timeGenerateToken, accessTokenErr := GenerateAccessToken(req)
 
 	if accessTokenErr != nil {
-		return "", accessTokenErr
+		return models.LoginResponse{}, accessTokenErr
 	}
 
 	refreshToken, refreshTokenErr := GenerateRefreshToken(req, timeGenerateToken)
 
 	if refreshTokenErr != nil {
-		return "", refreshTokenErr
+		return models.LoginResponse{}, refreshTokenErr
 	}
 
-	return accessToken, nil
+	return models.LoginResponse{Access_token: accessToken, Refresh_token: refreshToken}, nil
 }
 
 // ----------------------------Check BD----------------------------
 
 func getUserByGUID(guid string) error {
-	query := "SELECT id, password FROM users WHERE id = $1"
+	query := "SELECT id FROM users WHERE id = $1"
 
 	row := db.Conn.QueryRow(context.Background(), query, guid)
 
@@ -82,7 +82,7 @@ func GenerateRefreshToken(req models.LoginRequest, timeGenerateToken time.Time) 
 
 	sqlString := "INSERT INTO refresh_tokens (refresh_token, created_at, ip, id) VALUES ($1, $2, $3, $4)"
 
-	_, err := db.Conn.Exec(context.Background(), sqlString, refresh, timeGenerateToken.String(), req.Ip, req.Guid)
+	_, err := db.Conn.Exec(context.Background(), sqlString, refresh, timeGenerateToken, req.Ip, req.Guid)
 
 	if err != nil {
 		return "", err
