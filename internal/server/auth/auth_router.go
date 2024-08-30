@@ -33,7 +33,7 @@ func AuthRouter() *chi.Mux {
 		user, err := authservices.CreateTokens(req)
 
 		if err != nil {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
 

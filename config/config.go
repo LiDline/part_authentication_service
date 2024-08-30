@@ -12,14 +12,22 @@ type Config struct {
 	Secret string `env:"SECRET_KEY" env-required:"true"`
 }
 
+var Port string
+var DbUrl string
+var Secret string
+
 func MustLoadEnv() Config {
 	var cfg Config
 
 	err := cleanenv.ReadEnv(&cfg)
 
 	if err != nil {
-		log.Fatalf("DATABASE_URL environment variable is not set: %v", err)
+		log.Fatalf("Some environment is not set: %v", err)
 	}
+
+	Port = cfg.Port
+	DbUrl = cfg.DbUrl
+	Secret = cfg.Secret
 
 	return cfg
 }
