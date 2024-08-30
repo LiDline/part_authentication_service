@@ -47,5 +47,36 @@ func AuthRouter() *chi.Mux {
 		w.Write(response)
 	})
 
+	r.Post(constants.AUTH_REFRESH, func(w http.ResponseWriter, r *http.Request) {
+
+		var req customTypes.LoginResponse
+
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, "Bad request", http.StatusBadRequest)
+			return
+		}
+
+		if err := validate.Struct(&req); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		tokens, err := authservices.UpdateTokens(req)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
+
+		response, errJson := json.Marshal(tokens)
+
+		if errJson != nil {
+			http.Error(w, "Error marshalling JSON", http.StatusInternalServerError)
+			return
+		}
+
+		w.Write(response)
+	})
+
 	return r
 }

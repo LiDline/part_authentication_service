@@ -12,6 +12,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jackc/pgx/v4"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func CreateTokens(req models.LoginRequest) (models.LoginResponse, error) {
@@ -80,9 +81,11 @@ func GenerateRefreshToken(req models.LoginRequest, timeGenerateToken time.Time) 
 
 	refresh := base64.StdEncoding.EncodeToString(bytes)
 
+	refreshBcrypt, _ := bcrypt.GenerateFromPassword([]byte(refresh), bcrypt.DefaultCost)
+
 	sqlString := "INSERT INTO refresh_tokens (refresh_token, created_at, ip, id) VALUES ($1, $2, $3, $4)"
 
-	_, err := db.Conn.Exec(context.Background(), sqlString, refresh, timeGenerateToken, req.Ip, req.Guid)
+	_, err := db.Conn.Exec(context.Background(), sqlString, string(refreshBcrypt), timeGenerateToken, req.Ip, req.Guid)
 
 	if err != nil {
 		return "", err
