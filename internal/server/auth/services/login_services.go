@@ -23,19 +23,14 @@ func CreateTokens(req models.LoginRequest) (models.LoginResponse, error) {
 		return models.LoginResponse{}, errAuth
 	}
 
-	accessToken, timeGenerateToken, accessTokenErr := GenerateAccessToken(req)
+	res, errGenerated := generateTokens(req)
 
-	if accessTokenErr != nil {
-		return models.LoginResponse{}, accessTokenErr
+	if errGenerated != nil {
+		return models.LoginResponse{}, errGenerated
 	}
 
-	refreshToken, refreshTokenErr := GenerateRefreshToken(req, timeGenerateToken)
+	return res, nil
 
-	if refreshTokenErr != nil {
-		return models.LoginResponse{}, refreshTokenErr
-	}
-
-	return models.LoginResponse{Access_token: accessToken, Refresh_token: refreshToken}, nil
 }
 
 // ----------------------------Check BD----------------------------
@@ -57,6 +52,22 @@ func getUserByGUID(guid string) error {
 }
 
 // ----------------------------Generate tokens----------------------------
+
+func generateTokens(req models.LoginRequest) (models.LoginResponse, error) {
+	accessToken, timeGenerateToken, accessTokenErr := GenerateAccessToken(req)
+
+	if accessTokenErr != nil {
+		return models.LoginResponse{}, accessTokenErr
+	}
+
+	refreshToken, refreshTokenErr := GenerateRefreshToken(req, timeGenerateToken)
+
+	if refreshTokenErr != nil {
+		return models.LoginResponse{}, refreshTokenErr
+	}
+
+	return models.LoginResponse{Access_token: accessToken, Refresh_token: refreshToken}, nil
+}
 
 func GenerateAccessToken(req models.LoginRequest) (string, time.Time, error) {
 	timeNow := time.Now()
@@ -85,7 +96,6 @@ func GenerateRefreshToken(req models.LoginRequest, timeGenerateToken time.Time) 
 	refreshBcrypt, _ := bcrypt.GenerateFromPassword([]byte(refresh), bcrypt.DefaultCost)
 
 	sqlString := "INSERT INTO refresh_tokens (refresh_token, created_at, ip, user_id) VALUES ($1, $2, $3, $4)"
-	log.Print(timeGenerateToken.Unix())
 
 	_, err := db.Conn.Exec(context.Background(), sqlString, string(refreshBcrypt), timeGenerateToken.Unix(), req.Ip, req.Guid)
 

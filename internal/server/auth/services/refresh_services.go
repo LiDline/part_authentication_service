@@ -27,16 +27,27 @@ type payloadTokenProps struct {
 	Iat int64  `json:"iat"`
 }
 
+type checkRefreshTokenProps struct {
+	models.LoginRequest
+	Refresh_tokens_id int
+}
+
 func UpdateTokens(req models.RefreshRequest) (models.LoginResponse, error) {
 	payload := payloadToken(req.Access_token)
 
-	errQueryRefreshToken := checkRefreshToken(payload, req)
+	obj, errQueryRefreshToken := checkRefreshToken(payload, req)
 
 	if errQueryRefreshToken != nil {
 		return models.LoginResponse{}, errQueryRefreshToken
 	}
 
-	return models.LoginResponse{}, nil
+	res, errGenerated := generateNewTokens(obj)
+
+	if errGenerated != nil {
+		return models.LoginResponse{}, errGenerated
+	}
+
+	return res, nil
 }
 
 func payloadToken(tokenString string) payloadTokenProps {
@@ -50,12 +61,13 @@ func payloadToken(tokenString string) payloadTokenProps {
 	return payloadTokenProps{Sub: claims.Sub, Ip: claims.Ip, Iat: claims.Iat}
 }
 
-func checkRefreshToken(payload payloadTokenProps, req models.RefreshRequest) error {
+func checkRefreshToken(payload payloadTokenProps, req models.RefreshRequest) (checkRefreshTokenProps, error) {
 	query := `
     SELECT 
         refresh_token, 
         ip,
-		email 
+		email,
+		refresh_tokens.id AS refresh_tokens_id
     FROM 
         refresh_tokens 
 	INNER JOIN users ON users.id = refresh_tokens.user_id
@@ -69,24 +81,33 @@ func checkRefreshToken(payload payloadTokenProps, req models.RefreshRequest) err
 	var hashRefresh string
 	var ip string
 	var email string
+	var refresh_tokens_id int
 
-	errQuery := row.Scan(&hashRefresh, &ip, &email)
+	errQuery := row.Scan(&hashRefresh, &ip, &email, &refresh_tokens_id)
 
 	if errQuery == pgx.ErrNoRows {
-		return errQuery
+		return checkRefreshTokenProps{}, errQuery
 	}
 
 	errHashRefresh := bcrypt.CompareHashAndPassword([]byte(hashRefresh), []byte(req.Refresh_token))
 
 	if errHashRefresh != nil {
-		return errHashRefresh
+		return checkRefreshTokenProps{}, errHashRefresh
 	}
 
 	if payload.Ip != req.Ip {
 		sendEmail(email)
 	}
 
-	return nil
+	res := checkRefreshTokenProps{
+		LoginRequest: models.LoginRequest{
+			Guid: payload.Sub,
+			Ip:   req.Ip,
+		},
+		Refresh_tokens_id: refresh_tokens_id,
+	}
+
+	return res, nil
 }
 
 func sendEmail(toEmailAddress string) {
@@ -110,4 +131,22 @@ func sendEmail(toEmailAddress string) {
 	if err != nil {
 		log.Print(err)
 	}
+}
+
+func generateNewTokens(obj checkRefreshTokenProps) (models.LoginResponse, error) {
+	newTokens, errGenerated := generateTokens(obj.LoginRequest)
+
+	if errGenerated != nil {
+		return models.LoginResponse{}, errGenerated
+	}
+
+	sql := "DELETE FROM refresh_tokens WHERE id = $1"
+
+	_, err := db.Conn.Exec(context.Background(), sql, obj.Refresh_tokens_id)
+
+	if err != nil {
+		return models.LoginResponse{}, err
+	}
+
+	return newTokens, nil
 }
