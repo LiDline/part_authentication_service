@@ -2,6 +2,7 @@ package authservices
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/smtp"
 	"test/config"
@@ -33,7 +34,11 @@ type checkRefreshTokenProps struct {
 }
 
 func UpdateTokens(req models.RefreshRequest) (models.LoginResponse, error) {
-	payload := payloadToken(req.Access_token)
+	payload, errPayload := payloadToken(req.Access_token)
+
+	if errPayload != nil {
+		return models.LoginResponse{}, errPayload
+	}
 
 	obj, errQueryRefreshToken := checkRefreshToken(payload, req)
 
@@ -50,15 +55,19 @@ func UpdateTokens(req models.RefreshRequest) (models.LoginResponse, error) {
 	return res, nil
 }
 
-func payloadToken(tokenString string) payloadTokenProps {
+func payloadToken(tokenString string) (payloadTokenProps, error) {
 	token, _ := jwt.ParseWithClaims(tokenString, &tokenPayload{}, func(token *jwt.Token) (interface{}, error) {
 
 		return []byte(config.Secret), nil
 	})
 
-	claims, _ := token.Claims.(*tokenPayload)
+	claims, ok := token.Claims.(*tokenPayload)
 
-	return payloadTokenProps{Sub: claims.Sub, Ip: claims.Ip, Iat: claims.Iat}
+	if !ok {
+		return payloadTokenProps{}, fmt.Errorf("failed to parse token claims")
+	}
+
+	return payloadTokenProps{Sub: claims.Sub, Ip: claims.Ip, Iat: claims.Iat}, nil
 }
 
 func checkRefreshToken(payload payloadTokenProps, req models.RefreshRequest) (checkRefreshTokenProps, error) {

@@ -1,4 +1,4 @@
-# part_authentication_service
+# Общая информация
 
 Часть сервиса аутентификации
 
@@ -65,4 +65,73 @@ docker compose up --build # python3.10 и выше
 |
 └─ init.sql
     └─ Скрипт для БД
+```
+
+# Конечные точки
+
+1. [Healthcheck](#healthcheck)
+2. [POST /auth/login](#authlogin)
+3. [POST /auth/refresh_token](#authrefresh_token)
+
+## Эндпоинты
+
+### /healthcheck
+
+Пример **GET** запроса:
+
+```text
+curl --location 'http://localhost:5000/healthcheck'
+```
+
+Пример ответа:
+
+```text
+ok
+```
+
+### /auth
+
+#### /auth/login
+
+Пример **POST** запроса:
+
+```text
+curl --location 'http://localhost:5000/auth/login' \
+--header 'Content-Type: application/json' \
+--data '{
+    "guid": "57979158-bc47-490c-87fb-183d9b7a99d4",
+    "ip": "188.243.129.142"
+}'
+```
+
+Пример ответа:
+
+```text
+{
+    "access_token": "---token---",
+    "refresh_token": "---string---"
+}
+```
+
+#### /auth/refresh_token
+
+Пример **POST** запроса:
+
+```text
+curl --location 'http://localhost:5000/auth/refresh_token' \
+--header 'Content-Type: application/json' \
+--data '{
+    "access_token": "---token---",
+    "refresh_token": "---string---",
+    "ip": "188.243.129.142"
+}'
+```
+
+Пример ответа:
+
+```text
+{
+    "access_token": "---token---",
+    "refresh_token": "---string---"
+}
 ```
