@@ -2,7 +2,10 @@ package authservices
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/base64"
 	"test/config"
+	"test/internal/constants"
 	"test/internal/db"
 	models "test/internal/types"
 	"time"
@@ -18,10 +21,16 @@ func CreateTokens(req models.LoginRequest) (string, error) {
 		return "", errAuth
 	}
 
-	accessToken, accessTokenErr := GenerateAccessToken(req.Guid, req.Ip)
+	accessToken, timeGenerateToken, accessTokenErr := GenerateAccessToken(req)
 
 	if accessTokenErr != nil {
 		return "", accessTokenErr
+	}
+
+	refreshToken, refreshTokenErr := GenerateRefreshToken(req, timeGenerateToken)
+
+	if refreshTokenErr != nil {
+		return "", refreshTokenErr
 	}
 
 	return accessToken, nil
@@ -47,16 +56,37 @@ func getUserByGUID(guid string) error {
 
 // ----------------------------Generate tokens----------------------------
 
-func GenerateAccessToken(guid string, ip string) (string, error) {
+func GenerateAccessToken(req models.LoginRequest) (string, time.Time, error) {
+	timeNow := time.Now().UTC()
+
 	payload := jwt.MapClaims{
-		"guid": guid,
-		"ip":   ip,
-		"exp":  time.Now().Add(1 * time.Hour).Unix(),
+		"sub": req.Guid,
+		"ip":  req.Ip,
+		"exp": timeNow.Add(constants.EXP_ACCESS_TOKEN * time.Hour).String(),
+		"iat": timeNow.String(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS512, payload)
 
 	accessToken, err := token.SignedString([]byte(config.Secret))
 
-	return accessToken, err
+	return accessToken, timeNow, err
+}
+
+func GenerateRefreshToken(req models.LoginRequest, timeGenerateToken time.Time) (string, error) {
+	bytes := make([]byte, 16)
+
+	rand.Read(bytes)
+
+	refresh := base64.StdEncoding.EncodeToString(bytes)
+
+	sqlString := "INSERT INTO refresh_tokens (refresh_token, created_at, ip, id) VALUES ($1, $2, $3, $4)"
+
+	_, err := db.Conn.Exec(context.Background(), sqlString, refresh, timeGenerateToken.String(), req.Ip, req.Guid)
+
+	if err != nil {
+		return "", err
+	}
+
+	return refresh, nil
 }

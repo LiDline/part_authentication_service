@@ -9,6 +9,7 @@ CREATE TABLE users (
 CREATE TABLE refresh_tokens (
   refresh_token TEXT PRIMARY KEY,
   created_at TIMESTAMP,
+  ip TEXT,
   id GUID NOT NULL,
   FOREIGN KEY (id)  REFERENCES users (id) ON DELETE CASCADE
 );

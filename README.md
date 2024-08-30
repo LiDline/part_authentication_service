@@ -51,7 +51,7 @@ docker compose up --build # python3.10 и выше
 |
 ├─ internal
 |   ├─ constants
-|   |   └─ Общие константы
+|   |   └─ Общие константы (urls, время жизни токенов)
 |   ├─ db
 |   |   └─ Подключение к БД
 |   ├─ server
