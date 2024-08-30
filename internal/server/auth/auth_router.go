@@ -49,7 +49,7 @@ func AuthRouter() *chi.Mux {
 
 	r.Post(constants.AUTH_REFRESH, func(w http.ResponseWriter, r *http.Request) {
 
-		var req customTypes.LoginResponse
+		var req customTypes.RefreshRequest
 
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			http.Error(w, "Bad request", http.StatusBadRequest)

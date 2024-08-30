@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
+	"log"
 	"test/config"
 	"test/internal/constants"
 	"test/internal/db"
@@ -57,14 +58,18 @@ func getUserByGUID(guid string) error {
 
 // ----------------------------Generate tokens----------------------------
 
-func GenerateAccessToken(req models.LoginRequest) (string, time.Time, error) {
-	timeNow := time.Now().UTC()
+func GenerateAccessToken(req models.LoginRequest) (string, int, error) {
+	timeNow := time.Now().UTC().Nanosecond()
+
+	log.Print(timeNow)
+
+	log.Print(time.Now().Add(constants.EXP_ACCESS_TOKEN * 3600000).UTC().Nanosecond())
 
 	payload := jwt.MapClaims{
 		"sub": req.Guid,
 		"ip":  req.Ip,
-		"exp": timeNow.Add(constants.EXP_ACCESS_TOKEN * time.Hour).String(),
-		"iat": timeNow.String(),
+		"exp": time.Now().Add(constants.EXP_ACCESS_TOKEN * 3600000).UTC().Nanosecond(),
+		"iat": timeNow,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS512, payload)
@@ -74,7 +79,7 @@ func GenerateAccessToken(req models.LoginRequest) (string, time.Time, error) {
 	return accessToken, timeNow, err
 }
 
-func GenerateRefreshToken(req models.LoginRequest, timeGenerateToken time.Time) (string, error) {
+func GenerateRefreshToken(req models.LoginRequest, timeGenerateToken int) (string, error) {
 	bytes := make([]byte, 16)
 
 	rand.Read(bytes)

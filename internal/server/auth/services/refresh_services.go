@@ -1,7 +1,6 @@
 package authservices
 
 import (
-	"fmt"
 	"log"
 	"test/config"
 	models "test/internal/types"
@@ -16,7 +15,7 @@ type tokenPayload struct {
 	iat string
 }
 
-func UpdateTokens(req models.LoginResponse) (models.LoginResponse, error) {
+func UpdateTokens(req models.RefreshRequest) (models.LoginResponse, error) {
 	verifyToken(req.Access_token)
 
 	// if errToken != nil {
@@ -26,21 +25,11 @@ func UpdateTokens(req models.LoginResponse) (models.LoginResponse, error) {
 }
 
 func verifyToken(tokenString string) {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
-		}
-		return config.Secret, nil
-	})
-	if err != nil {
-		log.Fatalf("Error parsing token: %v", err)
-	}
+	token, _ := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		for key, value := range claims {
-			fmt.Printf("%s: %v\n", key, value)
-		}
-	} else {
-		fmt.Println("Invalid token")
-	}
+		return []byte(config.Secret), nil
+	})
+
+	log.Print(token.Valid)
+
 }

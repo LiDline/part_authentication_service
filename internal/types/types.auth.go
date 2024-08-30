@@ -9,3 +9,9 @@ type LoginResponse struct {
 	Access_token  string `json:"access_token" validate:"required"`
 	Refresh_token string `json:"refresh_token" validate:"required"`
 }
+
+type RefreshRequest struct {
+	Access_token  string `json:"access_token" validate:"required"`
+	Refresh_token string `json:"refresh_token" validate:"required"`
+	Ip            string `json:"ip" validate:"required,ip"`
+}

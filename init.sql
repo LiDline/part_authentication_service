@@ -8,7 +8,7 @@ CREATE TABLE users (
 
 CREATE TABLE refresh_tokens (
   refresh_token TEXT PRIMARY KEY,
-  created_at TIMESTAMP,
+  created_at INT,
   ip TEXT NOT NULL,
   id TEXT NOT NULL,
   FOREIGN KEY (id)  REFERENCES users (id) ON DELETE CASCADE
