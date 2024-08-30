@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
+	"log"
 	"test/config"
 	"test/internal/constants"
 	"test/internal/db"
@@ -59,12 +60,12 @@ func getUserByGUID(guid string) error {
 
 func GenerateAccessToken(req models.LoginRequest) (string, time.Time, error) {
 	timeNow := time.Now()
-
+	log.Print(timeNow.Unix())
 	payload := jwt.MapClaims{
 		"sub": req.Guid,
 		"ip":  req.Ip,
-		"exp": timeNow.Add(constants.EXP_ACCESS_TOKEN * time.Hour).Unix(),
-		"iat": time.Now().Unix(),
+		"exp": time.Now().Add(constants.EXP_ACCESS_TOKEN * time.Hour).Unix(),
+		"iat": timeNow.Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS512, payload)
@@ -83,7 +84,8 @@ func GenerateRefreshToken(req models.LoginRequest, timeGenerateToken time.Time) 
 
 	refreshBcrypt, _ := bcrypt.GenerateFromPassword([]byte(refresh), bcrypt.DefaultCost)
 
-	sqlString := "INSERT INTO refresh_tokens (refresh_token, created_at, ip, id) VALUES ($1, $2, $3, $4)"
+	sqlString := "INSERT INTO refresh_tokens (refresh_token, created_at, ip, user_id) VALUES ($1, $2, $3, $4)"
+	log.Print(timeGenerateToken.Unix())
 
 	_, err := db.Conn.Exec(context.Background(), sqlString, string(refreshBcrypt), timeGenerateToken.Unix(), req.Ip, req.Guid)
 

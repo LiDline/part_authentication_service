@@ -7,11 +7,12 @@ CREATE TABLE users (
 );
 
 CREATE TABLE refresh_tokens (
-  refresh_token TEXT PRIMARY KEY,
-  created_at INT,
+  id SERIAL PRIMARY KEY,
+  refresh_token TEXT,
+  created_at BIGINT,
   ip TEXT NOT NULL,
-  id TEXT NOT NULL,
-  FOREIGN KEY (id)  REFERENCES users (id) ON DELETE CASCADE
+  user_id TEXT NOT NULL,
+  FOREIGN KEY (user_id)  REFERENCES users (id) ON DELETE CASCADE
 );
 
 INSERT INTO users (id, email)
