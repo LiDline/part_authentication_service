@@ -34,6 +34,7 @@ cp example.env .env
 #### dev
 
 ```bash
+go mod download
 go run . # В .env вставьте свой DATABASE_URL
 ```
 
