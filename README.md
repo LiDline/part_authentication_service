@@ -26,7 +26,7 @@
 ### Первый шаг
 
 ```bash
-cp env.example .env
+cp example.env .env
 ```
 
 ### Второй шаг
@@ -40,7 +40,7 @@ go run . # В .env вставьте свой DATABASE_URL
 #### prod
 
 ```bash
-docker compose up --build # python3.10 и выше
+docker compose up --build
 ```
 
 ## Дерево проекта

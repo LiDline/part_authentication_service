@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
-	"log"
 	"test/config"
 	"test/internal/constants"
 	"test/internal/db"
@@ -71,7 +70,7 @@ func generateTokens(req models.LoginRequest) (models.LoginResponse, error) {
 
 func GenerateAccessToken(req models.LoginRequest) (string, time.Time, error) {
 	timeNow := time.Now()
-	log.Print(timeNow.Unix())
+
 	payload := jwt.MapClaims{
 		"sub": req.Guid,
 		"ip":  req.Ip,
